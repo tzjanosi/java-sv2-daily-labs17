@@ -24,7 +24,7 @@ public class ActivityTrackerMain {
             throw new IllegalStateException("Can not create data source", sqle);
         }
     }
-    public static void saveActivity(MariaDbDataSource dataSource, Activity activity) {
+    public void saveActivity(MariaDbDataSource dataSource, Activity activity) {
         try(Connection conn = dataSource.getConnection();
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO activities (start_time,activity_desc,activity_type) VALUES(?,?,?);");
         ){
@@ -54,9 +54,9 @@ public class ActivityTrackerMain {
         Activity avtivity2=new Activity(LocalDateTime.of(2022, 2, 14, 16, 57),"Tüskésrét",ActivityType.RUNNING);
         Activity avtivity3=new Activity(LocalDateTime.of(2022, 2, 15, 17, 5),"Környéken",ActivityType.BIKING);
         Activity avtivity4=new Activity(LocalDateTime.of(2022, 2, 16, 14, 0),"Zsolnay-negyed",ActivityType.BASKETBALL);
-        saveActivity(dataSource,avtivity1);
-        saveActivity(dataSource,avtivity2);
-        saveActivity(dataSource,avtivity3);
-        saveActivity(dataSource,avtivity4);
+        activityTracker.saveActivity(dataSource,avtivity1);
+        activityTracker.saveActivity(dataSource,avtivity2);
+        activityTracker.saveActivity(dataSource,avtivity3);
+        activityTracker.saveActivity(dataSource,avtivity4);
     }
 }

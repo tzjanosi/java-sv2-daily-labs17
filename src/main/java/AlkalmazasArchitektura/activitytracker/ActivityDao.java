@@ -1,6 +1,5 @@
-package EgyszeruJDBCLekerdezes.activitytracker;
+package AlkalmazasArchitektura.activitytracker;
 
-import org.flywaydb.core.Flyway;
 import org.mariadb.jdbc.MariaDbDataSource;
 
 import java.sql.*;
@@ -8,27 +7,19 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActivityTrackerMain {
-    public MariaDbDataSource createDBSource(String schema, String username, String password){
-        String url="jdbc:mariadb://localhost:3306/"+schema+"?useUnicode=true";
+public class ActivityDao {
+    private MariaDbDataSource dataSource;
 
-        try{
-            MariaDbDataSource dataSource = new MariaDbDataSource();
-            dataSource.setUrl(url);
-            dataSource.setUser(username);
-            dataSource.setPassword(password);
-            return dataSource;
-        }
-        catch (SQLException sqle) {
-            throw new IllegalStateException("Can not create data source", sqle);
-        }
+    public ActivityDao(MariaDbDataSource dataSource) {
+        this.dataSource = dataSource;
     }
-    public void saveActivity(MariaDbDataSource dataSource, Activity activity) {
+
+    public void saveActivity(Activity activity){
         try(Connection conn = dataSource.getConnection();
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO activities (start_time,activity_desc,activity_type) VALUES(?,?,?);");
         ){
-            LocalDateTime dateTime=activity.getStartTime();
-            Timestamp dateTimeAsTimestamp=Timestamp.valueOf(dateTime);
+            LocalDateTime localDateTime=activity.getStartTime();
+            Timestamp dateTimeAsTimestamp=Timestamp.valueOf(localDateTime);
             String description= activity.getDesc();
             ActivityType activityType=activity.getType();
             String activityTypeAsString=activityType.name();
@@ -42,7 +33,8 @@ public class ActivityTrackerMain {
             throw new IllegalStateException("Can not save data ", sqle);
         }
     }
-    public Activity selectSingleActivity(MariaDbDataSource dataSource,int id) {
+
+    public Activity findActivityById(long id){
         try (
                 Connection conn = dataSource.getConnection();
                 PreparedStatement stmt = conn.prepareStatement("SELECT start_time, activity_desc, activity_type FROM activities WHERE id = ?");
@@ -56,7 +48,7 @@ public class ActivityTrackerMain {
 
                     String desc = rs.getString("activity_desc");
                     ActivityType type = ActivityType.valueOf(rs.getString("activity_type"));
-                    Activity activity=new Activity(id,startTime,desc,type);
+                    Activity activity=new Activity((int)id,startTime,desc,type);
                     return activity;
                 }
                 throw new IllegalArgumentException("No result");
@@ -67,7 +59,8 @@ public class ActivityTrackerMain {
             throw new IllegalArgumentException("Error by select", sqle);
         }
     }
-    public List<Activity> selectAllActivities(MariaDbDataSource dataSource) {
+
+    public List<Activity> listActivities(){
         try (
                 Connection conn = dataSource.getConnection();
                 PreparedStatement stmt = conn.prepareStatement("SELECT * FROM activities ORDER BY id DESC");
@@ -95,29 +88,5 @@ public class ActivityTrackerMain {
         } catch (SQLException sqle) {
             throw new IllegalArgumentException("Error by select", sqle);
         }
-    }
-    public static void main(String[] args) {
-        ActivityTrackerMain activityTracker=new ActivityTrackerMain();
-        MariaDbDataSource dataSource=activityTracker.createDBSource("activitytracker","activitytracker","activitytracker");
-//        Flyway flyway = Flyway.configure().dataSource(dataSource).load();
-        Flyway flyway = Flyway.configure().locations("db/migrations/activitytracker").dataSource(dataSource).load();
-
-        flyway.clean();
-        flyway.migrate();
-
-        Activity avtivity1=new Activity(LocalDateTime.of(2022, 2, 13, 15, 56),"Jó kis testmozgás",ActivityType.HIKING);
-        Activity avtivity2=new Activity(LocalDateTime.of(2022, 2, 14, 16, 57),"Tüskésrét",ActivityType.RUNNING);
-        Activity avtivity3=new Activity(LocalDateTime.of(2022, 2, 15, 17, 5),"Környéken",ActivityType.BIKING);
-        Activity avtivity4=new Activity(LocalDateTime.of(2022, 2, 16, 14, 0),"Zsolnay-negyed",ActivityType.BASKETBALL);
-        activityTracker.saveActivity(dataSource,avtivity1);
-        activityTracker.saveActivity(dataSource,avtivity2);
-        activityTracker.saveActivity(dataSource,avtivity3);
-        activityTracker.saveActivity(dataSource,avtivity4);
-
-        Activity selectedActivity=activityTracker.selectSingleActivity(dataSource,2);
-        System.out.println(selectedActivity);
-
-        List<Activity> selectedActivities=activityTracker.selectAllActivities(dataSource);
-        System.out.println(selectedActivities);
     }
 }
