@@ -1,4 +1,4 @@
-package AlkalmazasArchitektura.activitytracker;
+package GeneraltAzonositoLekerdezese.activitytracker;
 
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,18 +22,28 @@ class ActivityDaoTest {
         flyway.clean();
         flyway.migrate();
 
-        Activity avtivity1=new Activity(LocalDateTime.of(2022, 2, 13, 15, 56),"Jó kis testmozgás",ActivityType.HIKING);
-        Activity avtivity2=new Activity(LocalDateTime.of(2022, 2, 14, 16, 57),"Tüskésrét",ActivityType.RUNNING);
-        Activity avtivity3=new Activity(LocalDateTime.of(2022, 2, 15, 17, 5),"Környéken",ActivityType.BIKING);
-        Activity avtivity4=new Activity(LocalDateTime.of(2022, 2, 16, 14, 0),"Zsolnay-negyed",ActivityType.BASKETBALL);
+        Activity avtivity1=new Activity(LocalDateTime.of(2022, 2, 13, 15, 56),"Jó kis testmozgás", ActivityType.HIKING);
+        Activity avtivity2=new Activity(LocalDateTime.of(2022, 2, 14, 16, 57),"Tüskésrét", ActivityType.RUNNING);
+        Activity avtivity3=new Activity(LocalDateTime.of(2022, 2, 15, 17, 5),"Környéken", ActivityType.BIKING);
+        Activity avtivity4=new Activity(LocalDateTime.of(2022, 2, 16, 14, 0),"Zsolnay-negyed", ActivityType.BASKETBALL);
 
         activityDao.saveActivity(avtivity1);
         activityDao.saveActivity(avtivity2);
         activityDao.saveActivity(avtivity3);
         activityDao.saveActivity(avtivity4);
     }
+    @Test
+    void saveActivityTest(){
+        Activity avtivity5=new Activity(LocalDateTime.of(2022, 2, 17, 12, 50, 22),"Sétálás", ActivityType.HIKING);
+        Activity activity=activityDao.saveActivity(avtivity5);
 
-   @Test
+        assertEquals(5, activity.getId());
+        assertEquals(LocalDateTime.of(2022, 2, 17, 12, 50, 22), activity.getStartTime());
+        assertEquals("Sétálás", activity.getDesc());
+        assertEquals(ActivityType.HIKING, activity.getType());
+    }
+
+    @Test
     void findActivityByIdTest(){
         Activity selectedActivity=activityDao.findActivityById(2);
         assertEquals(LocalDateTime.of(2022, 2, 14, 16, 57), selectedActivity.getStartTime());
