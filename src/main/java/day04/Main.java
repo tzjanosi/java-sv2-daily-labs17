@@ -4,7 +4,6 @@ import GeneraltAzonositoLekerdezese.activitytracker.DBSource;
 import org.flywaydb.core.Flyway;
 import org.mariadb.jdbc.MariaDbDataSource;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 

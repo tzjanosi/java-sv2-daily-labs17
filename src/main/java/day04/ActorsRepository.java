@@ -2,6 +2,7 @@ package day04;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.Optional;
 
 public class ActorsRepository {
     private DataSource dataSource;
@@ -24,9 +25,9 @@ public class ActorsRepository {
         }
     }
     public Actor saveActor(Actor actorToSave){
-        Actor foundActor=findActorByName(actorToSave.getName());
-        if(foundActor!=null){
-            return foundActor;
+        Optional<Actor> foundActor=findActorByName(actorToSave.getName());
+        if(foundActor.isPresent()){
+            return foundActor.get();
         }
         try(
                 Connection conn = dataSource.getConnection();
@@ -62,7 +63,7 @@ public class ActorsRepository {
             throw new IllegalArgumentException("Error by select", sqle);
         }
     }
-    public Actor findActorByName(String name){
+    public Optional<Actor> findActorByName(String name){
         try (
                 Connection conn = dataSource.getConnection();
                 PreparedStatement stmt = conn.prepareStatement("SELECT * FROM actors WHERE actor_name = ?");
@@ -74,9 +75,9 @@ public class ActorsRepository {
                 if (rs.next()) {
                     int id = rs.getInt("id");
                     Actor actor=new Actor(id,name);
-                    return actor;
+                    return Optional.of(actor);
                 }
-                return null;
+                return Optional.empty();
             }
         } catch (SQLException sqle) {
             throw new IllegalArgumentException("Error by select", sqle);
