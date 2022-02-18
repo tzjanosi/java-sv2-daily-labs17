@@ -1,8 +1,9 @@
-package day01;
+package day02;
 
 import org.mariadb.jdbc.MariaDbDataSource;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 public class Main {
     public static void main(String[] args) {
@@ -20,8 +21,10 @@ public class Main {
             throw new IllegalStateException("Can not create data source", sqle);
         }
         ActorsRepository actorsRepository=new ActorsRepository(dataSource);
-        actorsRepository.saveActor();
+        actorsRepository.saveActor(new Actor("Christian Slater"));
         System.out.println(actorsRepository.findActorById(2));
-
+        MoviesRepository moviesRepository=new MoviesRepository(dataSource);
+        moviesRepository.saveMovie(new Movie("Anyámék a havon", LocalDate.of(2022, 2, 15)));
+        System.out.println(moviesRepository.findAllMovies());
     }
 }

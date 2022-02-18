@@ -1,4 +1,4 @@
-package day01;
+package day02;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -10,11 +10,14 @@ public class ActorsRepository {
         this.dataSource = dataSource;
     }
 
-    public void saveActor(){
+    public void saveActor(Actor actorToSave){
         try(
                 Connection conn = dataSource.getConnection();
-                Statement stmt = conn.createStatement()){
-            stmt.executeUpdate("INSERT INTO actors (actor_name) VALUES('Fehér Virág');");
+                PreparedStatement stmt = conn.prepareStatement("INSERT INTO actors (actor_name) VALUES(?);");
+        ){
+            String name= actorToSave.getName();
+            stmt.setString(1, name);
+            stmt.executeUpdate();
         }
         catch (SQLException sqle) {
             throw new IllegalStateException("Can not insert into actors", sqle);
